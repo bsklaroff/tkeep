@@ -44,25 +44,31 @@ def time_to_str(total_seconds):
     return final_str
 
 def display_time(activity):
+    SECONDS_IN_WEEK = 604800
     try:
         f = open(activity, 'r')
     except:
         print 'No data exists for ' + activity
         return
     total = 0
-    while True:
-        try:
-            start = float(f.readline())
-        except:
-            break
-        try:
-            end = float(f.readline())
-        except:
+    this_week = 0
+    lines = f.readlines()
+    for i in range(0,(len(lines)+1)/2):
+        start = float(lines[2*i])
+        end = 0
+        if 2*i+1 < len(lines):
+            end = float(lines[2*i+1])
+        else:
             end = time.time()
             print 'The time for ' + activity + ' is currently running'
         total += end - start
-    time_str = time_to_str(total)
-    print 'You have spent ' + time_str + ' total on ' + activity
+        week_start = time.time() - SECONDS_IN_WEEK
+        if end > week_start:
+            this_week += end - max(start, week_start)
+    total_time_str = time_to_str(total)
+    week_time_str = time_to_str(this_week)
+    print 'You have spent ' + total_time_str + ' total on ' + activity
+    print 'You have spent ' + week_time_str + ' in the past week on ' + activity
 
 def main():
     p = argparse.ArgumentParser(description='Keep track of time.')
