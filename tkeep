@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-import argparse, time, datetime
+import os, argparse, time, datetime
+DIR = os.getenv("HOME") + '/.tkeep/'
 
 def start_time(activity):
-    f = open(activity, 'a+')
+    f = open(DIR + activity, 'a+')
     if len(f.readlines()) % 2 == 0:
         f.write(str(time.time()) + '\n')
         print 'Started keeping time for ' + activity
@@ -12,7 +13,7 @@ def start_time(activity):
     f.close()
 
 def end_time(activity):
-    f = open(activity, 'a+')
+    f = open(DIR + activity, 'a+')
     if len(f.readlines()) % 2 == 1:
         f.write(str(time.time()) + '\n')
         print 'Ended the time for ' + activity
@@ -46,7 +47,7 @@ def time_to_str(total_seconds):
 def display_time(activity):
     SECONDS_IN_WEEK = 604800
     try:
-        f = open(activity, 'r')
+        f = open(DIR + activity, 'r')
     except:
         print 'No data exists for ' + activity
         return
@@ -71,6 +72,8 @@ def display_time(activity):
     print 'You have spent ' + week_time_str + ' in the past week on ' + activity
 
 def main():
+    if not os.path.exists(DIR):
+        os.makedirs(DIR)
     p = argparse.ArgumentParser(description='Keep track of time.')
     p.add_argument('activities', metavar='N', type=str, nargs='+',
                    help='an activity to keep time for')

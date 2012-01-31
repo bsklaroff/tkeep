@@ -1,1 +1,1 @@
-A simple command-line utility for keeping track of how much time one spends on various activities over time.
+A simple command-line utility for keeping track of how much time one spends on various activities over time. To use, move the file tkeep to your /usr/local/bin/ directory.
