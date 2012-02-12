@@ -1,21 +1,23 @@
 #!/usr/bin/env python
 import os, argparse, time, datetime
 DIR = os.getenv("HOME") + '/.tkeep/'
+SECONDS_IN_WEEK = 604800
+SECONDS_IN_MINUTE = 60
 
-def start_time(activity):
+def start_time(activity, time_now):
     f = open(DIR + activity, 'a+')
     if len(f.readlines()) % 2 == 0:
-        f.write(str(time.time()) + '\n')
+        f.write(str(time_now) + '\n')
         print 'Started keeping time for ' + activity
     else:
         print ('You cannot start the time for ' + activity
                + ' because the time is already running!')
     f.close()
 
-def end_time(activity):
+def end_time(activity, time_now):
     f = open(DIR + activity, 'a+')
     if len(f.readlines()) % 2 == 1:
-        f.write(str(time.time()) + '\n')
+        f.write(str(time_now) + '\n')
         print 'Ended the time for ' + activity
     else:
         print ('You cannot end the time for ' + activity
@@ -45,7 +47,6 @@ def time_to_str(total_seconds):
     return final_str
 
 def display_time(activity):
-    SECONDS_IN_WEEK = 604800
     try:
         f = open(DIR + activity, 'r')
     except:
@@ -53,6 +54,7 @@ def display_time(activity):
         return
     total = 0
     this_week = 0
+    running = False
     lines = f.readlines()
     for i in range(0,(len(lines)+1)/2):
         start = float(lines[2*i])
@@ -61,7 +63,7 @@ def display_time(activity):
             end = float(lines[2*i+1])
         else:
             end = time.time()
-            print 'The time for ' + activity + ' is currently running'
+            running = True
         total += end - start
         week_start = time.time() - SECONDS_IN_WEEK
         if end > week_start:
@@ -70,6 +72,8 @@ def display_time(activity):
     week_time_str = time_to_str(this_week)
     print 'You have spent ' + total_time_str + ' total on ' + activity
     print 'You have spent ' + week_time_str + ' in the past week on ' + activity
+    if running:
+        print 'The time for ' + activity + ' is currently running'        
 
 def main():
     if not os.path.exists(DIR):
@@ -77,17 +81,21 @@ def main():
     p = argparse.ArgumentParser(description='Keep track of time.')
     p.add_argument('activities', metavar='N', type=str, nargs='+',
                    help='an activity to keep time for')
+    p.add_argument('-d', '--diff', type=int, default=0,
+                   help=('time difference from now to desired start '
+                         'or end time (in minutes)'))
     group = p.add_mutually_exclusive_group()
     group.add_argument('-s', '--start', action='store_true',
                        help='start timing the specified activities')
     group.add_argument('-e', '--end', action='store_true',
                        help='stop timing the specified activities')
     args = p.parse_args()
+    time_now = time.time() + args.diff * SECONDS_IN_MINUTE
     for activity in args.activities:
         if args.start:
-            start_time(activity)
+            start_time(activity, time_now)
         elif args.end:
-            end_time(activity)
+            end_time(activity, time_now)
         else:
             display_time(activity)
 
